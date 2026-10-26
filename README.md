@@ -11,7 +11,6 @@
 
 ### PrivacyAuditor 核心能力
 
-- **SDK 域名提取**（ADScope）：从 AAR/JAR 常量池静态提取 HTTP 端点，对代码混淆鲁棒，准确率 >95%
 - **静态识别**：扫描 APK DEX，匹配包名/域名/版本常量，识别集成的 SDK 及版本
 - **动态审计**：通过 mitmproxy 代理抓包，实时检测敏感字段上报
 - **加密穿透**：Frida 注入 SSL Pinning 绕过 + Cipher/JSON Hook，捕获加密前明文
@@ -112,16 +111,6 @@ python -X utf8 scripts\extract\compare_policy_vs_audit.py
 # 输出：output\policy_vs_audit_comparison.json
 ```
 
-### 5. 生成报告（按优化顺序执行）
-
-```powershell
-python -X utf8 scripts\report\final_optimize.py          # _final.docx
-python -X utf8 scripts\report\medium_optimize.py         # _medium.docx
-python -X utf8 scripts\report\extra_optimize.py          # _extra.docx
-python -X utf8 scripts\report\policy_comparison_optimize.py  # _policy.docx（最终版）
-python -X utf8 scripts\report\fix_heading_and_toc.py     # 修复标题样式
-```
-
 
 ## 依赖环境
 
@@ -133,7 +122,6 @@ playwright (chromium)
 beautifulsoup4
 requests
 python-docx
-jadx-gui-1.5.3（已内置于 jadx/ 目录）
 ```
 
 安装 Python 依赖：
