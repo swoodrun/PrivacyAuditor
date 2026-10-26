@@ -1,0 +1,78 @@
+﻿一、这是什么
+
+一键完成 Android App 广告 SDK 的动态隐私审计：抓网络流量、截获加密前明文、
+记录合规告警，结束后自动生成报告。所有结果按"包名"归到一个文件夹。
+
+
+二、前置条件（必须先准备好，exe 不包含这些）
+1. 安卓模拟器（推荐雷电），已开启，并完成：
+   - WiFi 代理 → 主机填"你电脑的 IPv4 地址"（cmd 里运行 ipconfig 查），端口填 8080
+   - 已安装 mitmproxy 的 CA 证书
+   - 已开启 ROOT
+2. 电脑已安装 Python（python.org 官方版），并执行：
+       pip install mitmproxy frida-tools
+3. 本文件夹里的文件齐全，且都在同一个文件夹（exe 靠它们运行，缺一不可）：
+       AuditDashboard.exe   privacy_auditor.py   sdk_registry.py
+       ssl_bypass.js   crypto_tracer.js   sensitive_api_tracer.js   anti_detection.js
+       icon.ico   start_frida_server.bat  start_frida_server.ps1
+
+
+三、每次开始前（两步）
+1. 双击  start_frida_server.bat
+   出现  [OK] frida-server 已启动  即成功（它会自动找 adb、连模拟器、起 frida-server）
+2. 双击  AuditDashboard.exe
+   - 看标题栏：应显示  v1.2 (2026-06-03)
+   - 看自检日志：privacy_auditor / sdk_registry / 三个 js / gen_report /
+     mitmdump / frida 全部显示 [✓]
+   - 若 [开始审计] 按钮是灰的，按日志提示补齐标 [✗] 的项
+
+
+四、审计一个 App（严格按顺序，约 4 分钟）
+1. 在模拟器里【强制停止】目标 App，并清掉后台任务
+2. （可选）先复制一段文字到剪贴板，用来测 App 是否偷读剪贴板
+3. 仪表盘输入【包名】（例：com.sankuai.meituan）→ 点【▶ 开始审计】
+4. App 会自动启动；看到隐私弹窗时【先别点同意】，盯住窗口等满 30 秒
+5. 点"同意"的那一刻 → 立刻点仪表盘上的【✅ 我点了同意】
+6. 正常使用约 1 分钟（首页 / 我的 / 消息），再看广告、点广告约 1 分钟
+7. 点【📱 切到后台】→ 在模拟器按 Home 静置 30 秒 → 点【📲 回到前台】
+8. 点【■ 结束审计】
+
+   操作过程中状态条会显示：同意前/已同意、前台/后台、已抓告警数。
+   日志滚动、出现告警都是正常的，不需要你判断，继续操作即可。
+
+
+五、结果在哪
+─────────────────────────────
+结束后，工作目录里会出现一个以【包名】命名的文件夹，里面三份文件：
+       包名.txt     ← 加密前明文（frida 截获）
+       包名.html    ← 合规检测报告（浏览器直接打开看）
+       包名.jsonl   ← 原始告警日志
+仪表盘下方三个按钮可直接打开它们；【📁 结果文件夹】打开整个文件夹。
+把这个【包名】文件夹整个交给组长即可。
+
+
+六、常见问题
+· [✗] frida 未找到：
+      pip install frida-tools；装完在命令行敲  frida --version  应有输出。
+      若提示"不是内部命令"，把 Python 的 Scripts 目录加进系统 PATH 后重开。
+· start_frida_server 提示"未检测到模拟器"：
+      先把雷电模拟器打开、完全启动后再双击 bat。
+· App 一打开就闪退 / 日志出现 Process terminated：
+      该 App 有反 Frida 保护，检测到注入会自杀。按强度递进尝试：
+      ① 先勾上"工作目录"那行的【反检测】，再点【开始审计】重试（日志会出现 [anti] ...）；
+         （frida-server 改随机名 + 换随机端口，绕过"扫进程名/27042端口"的检测），
+         看到 [OK] 已写隐身标记 后，再开 AuditDashboard.exe（自检会显示"隐身模式已就绪"），照常审计；
+      ② 还不行就换下一个 App，并备注"深度加固，对抗失败"。
+      注：用过隐身后若要恢复普通模式，双击普通的 start_frida_server.bat 即可（会清除隐身标记）。
+· 仪表盘卡住无响应：
+      本版已做高流量保护，正常不会卡；若仍卡，反馈给组长。
+· 日志出现 [归档] 移动失败：
+      极少见。可手动把工作目录里的 包名.txt 拖进 包名 文件夹。
+
+
+七、说明
+· 本工具只负责"运行 + 取证"，不会修改你的手机/模拟器数据。
+· 前置条件（模拟器 / 代理 / CA 证书 / frida-server / Python 库）需自行准备，exe未集成这些
+
+
+
